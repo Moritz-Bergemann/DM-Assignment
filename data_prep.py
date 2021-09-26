@@ -1,9 +1,10 @@
 import pandas as pd
 
-def main():
+def _get_dataset():
     # Read in the data
-    df_in = pd.read_csv('data/data2021.student.csv')
+    return pd.read_csv('./data/data2021.student.csv')
 
+def _prep_dataset(df_in):
     ## Basic operations
     # Drop rows to predict
     df = df_in.dropna(subset=['Class'])
@@ -51,6 +52,18 @@ def main():
     print(f"Filling missing values with column node")
     for col in df.columns:
         df[col] = df[col].fillna(value=df[col].mode())
+
+    return df
+
+def get_prepped_dataset():
+    df = _get_dataset()
+
+    return _prep_dataset(df)
+
+def main():
+    df_in = _get_dataset()
+
+    df = _prep_dataset(df_in)
 
     print("Done! Saving...")
 
