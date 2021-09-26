@@ -20,8 +20,8 @@ def _prep_dataset(df_in):
     # Convert numeric attributes to categorical through binning
     numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
     for col in numeric_cols:
-        pd.cut(df[col], bins=10)
-        df[col] = pd.cut(df[col], bins=10)
+        # pd.cut(df[col], bins=10)
+        df[col] = pd.cut(df[col], bins=10, labels=[f'bin-{ii}' for ii in range(10)])
 
     ## Removing duplicate rows
     print("Removing duplicate rows...")
