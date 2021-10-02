@@ -23,6 +23,7 @@ def _get_high_corr_cols(df:pd.DataFrame, corr_threshold:float):
 def _prep_dataset(  df:pd.DataFrame, 
                     bins=None, cat_binning_threshold=30, bin_type='width',
                     variance_threshold=0.005, cat_monotony_threshold=0.95, num_corr_threshold=0.95, cat_association_threshold=0.95,
+                    row_missing_val_threshold=0.5,
                     cols_to_drop=[]):
     
     ## Remove the 'ID' column
@@ -125,12 +126,18 @@ def _prep_dataset(  df:pd.DataFrame,
     df_train:pd.DataFrame = df.iloc[:1000]
     df_test:pd.DataFrame = df.iloc[1000:]
 
-    ## TODO drop rows with mostly missing values in training set
-
-    # TODO SMOTE
+    # TODO SMOTE on training set
     
-    # Remove duplicate rows in training set
+    ## Remove duplicate rows in training set
+    print(f"[i] Dropping {len(df_train.duplicated())} duplicate rows")
     df_train = df_train.drop_duplicates()
+    
+    # Remove rows in training set with at least threshold missing values
+    na_thresh = int(len(df_train.columns) * (1-row_missing_val_threshold))
+    df_train = df_train.dropna(thresh=na_thresh)
+
+    print(f"[i] Final training set size: {len(df_train)}")
+    print(f"[i] Final test set size: {len(df_test)}")
 
     return df_train, df_test
 
