@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from math import sqrt
 from scipy.stats import chi2_contingency
+from imblearn.over_sampling import SMOTE
 
 def _get_dataset():
     # Read in the data
@@ -24,12 +25,13 @@ def _prep_dataset(  df:pd.DataFrame,
                     bins=None, cat_binning_threshold=30, bin_type='width',
                     variance_threshold=0.005, cat_monotony_threshold=0.95, num_corr_threshold=0.95, cat_association_threshold=0.95,
                     row_missing_val_threshold=0.5,
+                    do_smote=True,
                     cols_to_drop=[]):
     
     ## Remove the 'ID' column
     df = df.drop(['ID'], axis=1)
 
-    ## Convert attributes with less than 30 unique values to categorical # TODO JUSTIFY 30
+    ## Convert attributes with less than threshold unique values to categorical
     lt_cat_threshold_cols = [col for col in df.columns if df[col].nunique() <= cat_binning_threshold]
     print(f"[i] Converting columns with >={cat_binning_threshold} unique values to categorical: {lt_cat_threshold_cols}")
     df[lt_cat_threshold_cols] = df[lt_cat_threshold_cols].astype('category')
@@ -39,7 +41,7 @@ def _prep_dataset(  df:pd.DataFrame,
 
     ## Drop cols with missing values (>=0.8) # TODO maybe drop for numeric at like 75% and for categorical at like 90%?
     cols_missing_values_80 = cols_missing_values[cols_missing_values >= 0.8]
-    print(f"Removing columns with more than 80% missing values: {list(cols_missing_values_80.index)}")
+    print(f"Removing columns with >={0.8} missing values: {list(cols_missing_values_80.index)}")
     df = df.drop(cols_missing_values_80.index, axis=1)
 
     # Account for missing values in categorical columns (not including 'Class')
@@ -126,15 +128,13 @@ def _prep_dataset(  df:pd.DataFrame,
     df_train:pd.DataFrame = df.iloc[:1000]
     df_test:pd.DataFrame = df.iloc[1000:]
 
-    # TODO SMOTE on training set
-    
     ## Remove duplicate rows in training set
     print(f"[i] Dropping {len(df_train.duplicated())} duplicate rows")
     df_train = df_train.drop_duplicates()
     
     # Remove rows in training set with at least threshold missing values
     na_thresh = int(len(df_train.columns) * (1-row_missing_val_threshold))
-    df_train = df_train.dropna(thresh=na_thresh)
+    df_train = df_train.dropna(thresh=na_thresh)        
 
     print(f"[i] Final training set size: {len(df_train)}")
     print(f"[i] Final test set size: {len(df_test)}")

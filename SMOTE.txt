@@ -1,0 +1,8 @@
+    if do_smote:
+        print(f"[i] Applying smote")
+        smote = SMOTE(random_state=0)
+        df_train_X, df_train_y = smote.fit_resample(df_train.drop('Class', axis=1), df_train['Class'])
+
+        df_train = df_train_X
+        df_train['Class'] = df_train_y
+    Thiss doesn't work 🙁
