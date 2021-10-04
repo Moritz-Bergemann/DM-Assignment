@@ -26,7 +26,7 @@ RANDOM_STATE = 123
 # TODO don't be a perfectionist!
 
 # Non Sklearn-adjustable hyperparams go in here!!!
-def trial(model:str, drop_attributes:list, sampling:str, bins:int): # TODO pick h-params to adjust
+def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:int): # TODO pick h-params to adjust
     df_train, _ = data_prep.get_prepped_dataset(bins=bins)
 
     ## Input validation
@@ -91,36 +91,21 @@ def trial(model:str, drop_attributes:list, sampling:str, bins:int): # TODO pick 
     # Make final pipeline
     pipe = ImbPipeline(pipe_parts)
 
-    ## Add grid search feature selection
-    if model =='knn':
-        param_grid = {
-            # All odd values for k-neighbors between 3 & 22
-            'model_knn__k_neighbors': [ii for ii in range(3, 22, 2)]
-        }
-    if model =='dt':
-        param_grid = {
-            'model_dt__criterion': ['gini', 'entropy'],
-            'model_dt__min_samples_split': [ii for ii in range(2, 41)],
-            'model_dt__min_samples_leaf': [ii for ii in range(1, 21)]
-        }
-    if model =='nbayes':
-        param_grid = {
-        }
-    if model =='svm':
-        raise NotImplementedError
-        param_grid = {
-
-        }
-
     # Define K-fold sampling
     skfold = StratifiedKFold(n_splits=10)
     
+    ## Suggested param_grid params:
+    # knn - k_neighbors
+    # dt - criterion, min_samples_split, min_samples_leaf
+    # nbayes - TODO
+    # svm - TODO
+
     grid_search = GridSearchCV(pipe, param_grid, cv=skfold, verbose=2)
 
     print("[i] Starting train...")
     start_time = dt.datetime.now()
     grid_search.fit(X, y)
-    print(f"[i] Training complete! Elapsed time - {(dt.datetime.now() - start_time).total_seconds}s")
+    print(f"[i] Training complete! Elapsed time - {(dt.datetime.now() - start_time).total_seconds()}s")
 
     # Make save string
     if drop_attributes == None or len(drop_attributes) == 0:
@@ -134,7 +119,13 @@ def trial(model:str, drop_attributes:list, sampling:str, bins:int): # TODO pick 
         pickle.dump(grid_search, f)
 
 def main():
-    trial(model='dt', drop_attributes=None, sampling='over', bins=10)
+    param_grid = {
+        'model_dt__criterion': ['gini', 'entropy'],
+        'model_dt__min_samples_split': [2, 10, 40],
+        'model_dt__min_samples_leaf': [1, 10, 20]
+    }
+
+    trial(model='dt', param_grid=param_grid, drop_attributes=None, sampling='over', bins=10)
 
 if __name__ == '__main__':
     main()
