@@ -4,3 +4,4 @@ scipy
 pandas
 scikit-learn
 imblearn
+seaborn
