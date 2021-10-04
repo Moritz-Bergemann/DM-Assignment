@@ -17,7 +17,7 @@ from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
-from imblearn.over_sampling import SMOTE, SMOTEN
+from imblearn.over_sampling import SMOTEN, SMOTENC
 from imblearn.under_sampling import RandomUnderSampler, EditedNearestNeighbours, TomekLinks, ClusterCentroids
 from imblearn.pipeline import Pipeline as ImbPipeline
 
@@ -44,15 +44,12 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
 
     ## Prepare Dataset
     # Split into labels/not labels
-    df_X = df_train.drop('Class', axis=1)
-    df_y = df_train['Class']
+    X = df_train.drop('Class', axis=1)
+    y = df_train['Class']
 
     # Drop attributes to drop
     if drop_attributes != None and len(drop_attributes) != 0:
-        df_X = df_X.drop(drop_attributes, axis=1)
-
-    X = df_X.to_numpy()
-    y = df_y.to_numpy()
+        X = X.drop(drop_attributes, axis=1)
 
     print("[i] Loaded dataset")
 
@@ -72,22 +69,34 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
             elif sampling == 'smote-random-under':
                 pipe_parts.append(('smoten', SMOTEN(sampling_strategy=0.45)))
                 pipe_parts.append(('undersample', RandomUnderSampler(sampling_strategy=0.6)))
-            # elif sampling == 'smote-enn':
-            #     pipe_parts.append(('smoten', SMOTEN(sampling_strategy=0.45)))
-            #     pipe_parts.append(('enn', EditedNearestNeighbours(sampling_strategy=0.6)))
-            # elif sampling == 'smote-tomek':
-            #     pipe_parts.append(('smoten', SMOTEN(sampling_strategy=0.45)))
-            #     pipe_parts.append(('enn', TomekLinks(sampling_strategy=0.6)))
-
         else: # Add Smote-Mixed if things not binned
-            raise NotImplementedError() # TODO
-    
+            if sampling == 'smote':
+                pipe_parts.append(('smotenc', SMOTENC(sampling_strategy=1)))
+            elif sampling == 'random-under':
+                pipe_parts.append(('undersample', RandomUnderSampler(sampling_strategy=0.5)))
+            elif sampling == 'smote-random-under':
+                pipe_parts.append(('smotenc', SMOTENC(sampling_strategy=0.45)))
+                pipe_parts.append(('undersample', RandomUnderSampler(sampling_strategy=0.6)))
+
     # One-hot encoding
     if bins != None: # Use onehot encoder if everything binned
-        categories = [list(df_X[col].cat.categories) for col in df_X.columns]
+        categories = [list(X[col].cat.categories) for col in X.columns]
         pipe_parts.append(('onehot', OneHotEncoder(categories=categories)))
     else: # Use mixed encoder if not everything binned
-            raise NotImplementedError() # TODO
+        categorical_atts = X.select_dtypes(include='category').columns
+        numeric_atts = X.select_dtypes(include=['int64', 'float64']).columns
+        assert len(categorical_atts) + len(numeric_atts) == len(X.columns)
+
+        categories = [list(X[col].cat.categories) for col in X[categorical_atts].columns]
+
+        col_transformer = ColumnTransformer(
+            transformers=[
+                ('onehot', OneHotEncoder(categories=categories), categorical_atts)
+            ], # One-hot encode categorical attributes
+            remainder='passthrough' # Let through numeric attributes
+        )
+        
+        pipe_parts.append(('selective-onehot', col_transformer))
     
     # Model itself
     if model =='knn':
@@ -132,6 +141,8 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
     with open(save_path, 'wb') as f:
         pickle.dump(grid_search, f)
     
+    print(f"Best Score: {grid_search.best_score_}")
+
     if san_check:
         print(f"Sanity Check: {sanity_check(grid_search, drop_attributes=drop_attributes, bins=bins)}")
 
@@ -143,15 +154,12 @@ def sanity_check(result:GridSearchCV, drop_attributes, bins):
 
     ## Prepare Dataset
     # Split into labels/not labels
-    df_X = df_train.drop('Class', axis=1)
-    df_y = df_train['Class']
+    X = df_train.drop('Class', axis=1)
+    y = df_train['Class']
 
     # Drop attributes to drop
     if drop_attributes != None and len(drop_attributes) != 0:
-        df_X = df_X.drop(drop_attributes, axis=1)
-
-    X = df_X.to_numpy()
-    y = df_y.to_numpy()
+        df_X = X.drop(drop_attributes, axis=1)
 
     # Encode labels
     y = LabelEncoder().fit_transform(y)
@@ -172,8 +180,17 @@ def main():
     }
 
     print("No Sampling Strategy")
-    result = trial(model='dt', param_grid=param_grid, drop_attributes=None, sampling='none', bins=None, verbosity=0)
-    print(result.best_score_)
+    trial(model='knn', param_grid=param_grid, drop_attributes=None, sampling='none', bins=None, verbosity=0)
+
+    print("Undersampling (Random)")
+    trial(model='knn', param_grid=param_grid, drop_attributes=None, sampling='random-under', bins=10, verbosity=0)
+
+    print("Oversampling")
+    trial(model='knn', param_grid=param_grid, drop_attributes=None, sampling='smote', bins=10, verbosity=0)
+
+    print("SMOTE & Random Undersampling")
+    trial(model='knn', param_grid=param_grid, drop_attributes=None, sampling='smote-random-under', bins=10, verbosity=0)
+
 
 def main2():
     # OLD STUFF
