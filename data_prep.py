@@ -55,7 +55,6 @@ def _prep_dataset(  df:pd.DataFrame,
     # Account for missing values in categorical columns (not including 'Class')
     cat_cols = df.select_dtypes(include=['category']).columns.drop('Class')
     for col in cat_cols:
-        print(f"[d] Cat miss val check for '{col}' = {cols_missing_values[col]}")
         if cols_missing_values[col] > 0:
             ## In cat. columns with <=0.05 missing values, replace missing values with the mode
             if cols_missing_values[col] <= 0.05:
