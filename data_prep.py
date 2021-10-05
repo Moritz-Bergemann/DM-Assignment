@@ -96,7 +96,7 @@ def _prep_dataset(  df:pd.DataFrame,
         printv(f"Converting numeric attributes to categorical through {bin_type}-wise binning ({bins} bins): {list(numeric_cols)}")
 
         for col in numeric_cols:
-            df[col] = pd.cut(df[col], bins=bins, labels=[f'bin-{ii}' for ii in range(10)])
+            df[col] = pd.cut(df[col], bins=bins, labels=[f'bin-{ii}' for ii in range(bins)])
 
     # Drop monotonous categorical cols
     cat_cols = df.select_dtypes(include=['category']).drop(['Class'], axis=1).columns
