@@ -39,7 +39,7 @@ class DenseTransformer(TransformerMixin):
         return X.todense()
 
 # Non Sklearn-adjustable hyperparams go in here!!! # TODO drop-trials rather than drop_attributes
-def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:int, verbosity=2, save_folder='trials', scale_or_norm='none', scoring='accuracy', just_get_pipeline=False): # TODO pick h-params to adjust
+def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:int, verbosity=2, save_folder='trials', scaling_technique='none', scoring='accuracy', just_get_pipeline=False): # TODO pick h-params to adjust
     df_train, _ = data_prep.get_prepped_dataset(bins=bins, normalize=False)
 
     df_train.to_csv("check_myself.csv", index=False)
@@ -47,7 +47,7 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
     ## Input validation
     assert sampling in ['none', 'smote', 'random-under', 'smote-random-under']
     assert scoring in ['accuracy', 'f1']
-    assert scale_or_norm in ['none', 'minmax', 'standard', 'quantile']
+    assert scaling_technique in ['none', 'minmax', 'standard', 'quantile']
     assert model in ['knn', 'dt', 'gnbayes', 'comnbayes', 'svc']
     if drop_attributes != None:
         assert set(drop_attributes) <= set(list(df_train.columns)) # Each col to drop must be in cols
@@ -112,13 +112,13 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
 
         # scaler = 'passthrough'
         # Choose scaling type # TODO remove this 
-        if scale_or_norm == 'none':
+        if scaling_technique == 'none':
             scaler = 'passthrough'
-        elif scale_or_norm == 'minmax':
+        elif scaling_technique == 'minmax':
             scaler = MinMaxScaler()
-        elif scale_or_norm == 'standard':
+        elif scaling_technique == 'standard':
             scaler = StandardScaler()
-        elif scale_or_norm == 'quantile':
+        elif scaling_technique == 'quantile':
             scaler = QuantileTransformer(n_quantiles=len(X)//2)
 
         col_transformer = ColumnTransformer(
@@ -177,7 +177,7 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
         drop_save_string = "none"
     else:
         drop_save_string = f"[{','.join(drop_attributes)}]"
-    save_path = f"./{save_folder}/m={model}-s={sampling}-b={bins},d={drop_save_string},sc={scale_or_norm}.pickle"
+    save_path = f"./{save_folder}/m={model}-s={sampling}-b={bins},d={drop_save_string},sc={scaling_technique}.pickle"
 
     print(f"[i] Trial: Saving results to {save_path}")
     with open(save_path, 'wb') as f:
@@ -234,10 +234,10 @@ def main():
 
     # param_grid = {
     #     'model_svc__C': [1],
-    #     'model_svc__kernel': ['linear']
+    #     'model_svc__kernel': ['linear', 'poly', 'rbf', 'sigmoid' ]
     # }
     
-    # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, scale_or_norm='quantile', sampling='none', bins=None, save_folder="./sam", verbosity=0)
+    # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, scaling_technique='quantile', sampling='none', bins=None, save_folder="./sam", verbosity=0)
 
     # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, sampling='smote', bins=5, save_folder="./final", verbosity=0)
     # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, sampling='random-under', bins=5, save_folder="./final", verbosity=0)
@@ -296,11 +296,11 @@ def experiment1():
             print(f"[M] m={item['model']}, scaling={scaling_technique}")
 
             # Don't do SVC without scaling 
-            if item['model'] == 'svc' and item['scaling'] == 'none':
+            if item['model'] == 'svc' and scaling_technique == 'none':
                 print("[M] Skipping svc with no scaling")
                 continue
             
-            _, best_score, _ = trial(model=item['model'], param_grid=item['param_grid'], drop_attributes=None, sampling='none', bins=None, save_folder=save_folder, scoring='accuracy', verbosity=0)
+            _, best_score, _ = trial(model=item['model'], param_grid=item['param_grid'], scaling_technique=scaling_technique, drop_attributes=None, sampling='none', bins=None, save_folder=save_folder, scoring='accuracy', verbosity=0)
             result_data.append([scaling_technique, item['model'], best_score])
 
     results_table = pd.DataFrame(data=result_data, columns=["scaling_technique", "model", "best_score_acc"])
@@ -318,7 +318,7 @@ def experiment1():
                 print("[M] Skipping svc with no scaling")
                 continue
 
-            _, best_score, _ = trial(model=item['model'], param_grid=item['param_grid'], drop_attributes=None, sampling='none', bins=None, save_folder=save_folder, scoring='f1', verbosity=0)
+            _, best_score, _ = trial(model=item['model'], param_grid=item['param_grid'], scaling_technique=scaling_technique, drop_attributes=None, sampling='none', bins=None, save_folder=save_folder, scoring='f1', verbosity=0)
             result_data.append([scaling_technique, item['model'], best_score])
 
     results_table = pd.DataFrame(data=result_data, columns=["scaling_technique", "model", "best_score_acc"])
