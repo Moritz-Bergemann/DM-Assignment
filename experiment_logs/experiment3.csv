@@ -1,0 +1,11 @@
+metric,model,score,best_params
+accuracy,knn,0.7366666666666667,{'model_knn__n_neighbors': 83}
+accuracy,dt,0.7366666666666667,"{'model_dt__criterion': 'gini', 'model_dt__max_depth': 41, 'model_dt__min_samples_leaf': 11, 'model_dt__min_samples_split': 38}"
+accuracy,gnbayes,0.7411111111111112,{'model_gnbayes__var_smoothing': 1.0}
+accuracy,comnbayes,0.7433333333333334,{'model_comnbayes__alpha': 78.96522868499724}
+accuracy,svc,0.7611111111111111,"{'model_svc__C': 2, 'model_svc__gamma': 0.125, 'model_svc__kernel': 'rbf'}"
+f1_macro,knn,0.678229540412479,{'model_knn__n_neighbors': 83}
+f1_macro,dt,0.6765533977758944,"{'model_dt__criterion': 'gini', 'model_dt__max_depth': 46, 'model_dt__min_samples_leaf': 9, 'model_dt__min_samples_split': 30}"
+f1_macro,gnbayes,0.7044762688742757,{'model_gnbayes__var_smoothing': 0.1873817422860384}
+f1_macro,comnbayes,0.70578628311366,{'model_comnbayes__alpha': 0.046415888336127774}
+f1_macro,svc,0.7151761240510766,"{'model_svc__C': 128, 'model_svc__gamma': 0.015625, 'model_svc__kernel': 'poly'}"

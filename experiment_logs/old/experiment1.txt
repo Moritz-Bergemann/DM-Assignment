@@ -1,0 +1,160 @@
+[M] STARTING EXPERIMENT 1
+[M] m=knn, bins=None
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 1.122995s
+[i] Trial: Saving results to ./experiment1/m=knn-s=none-b=None,d=none.pickle
+[s] Best Score: 0.7422222222222222
+[s] Sanity Check: 0.7277777777777777
+[s] F1 Score: 0.38836532799041296
+[M] m=dt, bins=None
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.488512s
+[i] Trial: Saving results to ./experiment1/m=dt-s=none-b=None,d=none.pickle
+[s] Best Score: 0.7044444444444444
+[s] Sanity Check: 0.75
+[s] F1 Score: 0.40138184833231916
+[M] m=gnbayes, bins=None
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.468382s
+[i] Trial: Saving results to ./experiment1/m=gnbayes-s=none-b=None,d=none.pickle
+[s] Best Score: 0.7488888888888889
+[s] Sanity Check: 0.7333333333333333
+[s] F1 Score: 0.3935099266059018
+[M] m=comnbayes, bins=None
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.175882s
+[i] Trial: Saving results to ./experiment1/m=comnbayes-s=none-b=None,d=none.pickle
+[s] Best Score: 0.7122222222222222
+[s] Sanity Check: 0.6944444444444444
+[s] F1 Score: 0.5831936547677046
+[M] m=svc, bins=None
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 1.378153s
+[i] Trial: Saving results to ./experiment1/m=svc-s=none-b=None,d=none.pickle
+[s] Best Score: 0.7555555555555555
+[s] Sanity Check: 0.7611111111111111
+[s] F1 Score: 0.49393014511147604
+[M] m=knn, bins=5
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.195763s
+[i] Trial: Saving results to ./experiment1/m=knn-s=none-b=5,d=none.pickle
+[s] Best Score: 0.7377777777777779
+[s] Sanity Check: 0.7222222222222222
+[s] F1 Score: 0.41551990885528217
+[M] m=dt, bins=5
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.401665s
+[i] Trial: Saving results to ./experiment1/m=dt-s=none-b=5,d=none.pickle
+[s] Best Score: 0.7433333333333334
+[s] Sanity Check: 0.7277777777777777
+[s] F1 Score: 0.48590966736086016
+[M] m=gnbayes, bins=5
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.353645s
+[i] Trial: Saving results to ./experiment1/m=gnbayes-s=none-b=5,d=none.pickle
+[s] Best Score: 0.7477777777777778
+[s] Sanity Check: 0.7444444444444445
+[s] F1 Score: 0.3716164414472834
+[M] m=comnbayes, bins=5
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.242467s
+[i] Trial: Saving results to ./experiment1/m=comnbayes-s=none-b=5,d=none.pickle
+[s] Best Score: 0.7222222222222221
+[s] Sanity Check: 0.7277777777777777
+[s] F1 Score: 0.5932715832851579
+[M] m=svc, bins=5
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 1.727753s
+[i] Trial: Saving results to ./experiment1/m=svc-s=none-b=5,d=none.pickle
+[s] Best Score: 0.7588888888888888
+[s] Sanity Check: 0.7555555555555555
+[s] F1 Score: 0.5228119170823031
+[M] m=knn, bins=10
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.188093s
+[i] Trial: Saving results to ./experiment1/m=knn-s=none-b=10,d=none.pickle
+[s] Best Score: 0.7277777777777776
+[s] Sanity Check: 0.7333333333333333
+[s] F1 Score: 0.32025075343558496
+[M] m=dt, bins=10
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.330019s
+[i] Trial: Saving results to ./experiment1/m=dt-s=none-b=10,d=none.pickle
+[s] Best Score: 0.7188888888888888
+[s] Sanity Check: 0.7111111111111111
+[s] F1 Score: 0.44512564903939367
+[M] m=gnbayes, bins=10
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.324102s
+[i] Trial: Saving results to ./experiment1/m=gnbayes-s=none-b=10,d=none.pickle
+[s] Best Score: 0.75
+[s] Sanity Check: 0.7555555555555555
+[s] F1 Score: 0.37682603371247664
+[M] m=comnbayes, bins=10
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.157685s
+[i] Trial: Saving results to ./experiment1/m=comnbayes-s=none-b=10,d=none.pickle
+[s] Best Score: 0.7133333333333333
+[s] Sanity Check: 0.7333333333333333
+[s] F1 Score: 0.581834259181494
+[M] m=svc, bins=10
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 1.779549s
+[i] Trial: Saving results to ./experiment1/m=svc-s=none-b=10,d=none.pickle
+[s] Best Score: 0.7544444444444445
+[s] Sanity Check: 0.7611111111111111
+[s] F1 Score: 0.4556126896525609
+[M] m=knn, bins=20
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.180579s
+[i] Trial: Saving results to ./experiment1/m=knn-s=none-b=20,d=none.pickle
+[s] Best Score: 0.7311111111111112
+[s] Sanity Check: 0.7111111111111111
+[s] F1 Score: 0.3103773561668299
+[M] m=dt, bins=20
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.367434s
+[i] Trial: Saving results to ./experiment1/m=dt-s=none-b=20,d=none.pickle
+[s] Best Score: 0.7088888888888889
+[s] Sanity Check: 0.7111111111111111
+[s] F1 Score: 0.42716762298629546
+[M] m=gnbayes, bins=20
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.337427s
+[i] Trial: Saving results to ./experiment1/m=gnbayes-s=none-b=20,d=none.pickle
+[s] Best Score: 0.7455555555555555
+[s] Sanity Check: 0.7277777777777777
+[s] F1 Score: 0.37067485648130816
+[M] m=comnbayes, bins=20
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 0.1575s
+[i] Trial: Saving results to ./experiment1/m=comnbayes-s=none-b=20,d=none.pickle
+[s] Best Score: 0.7088888888888889
+[s] Sanity Check: 0.7222222222222222
+[s] F1 Score: 0.5619834002209486
+[M] m=svc, bins=20
+[i] Loaded dataset
+[i] Starting train...
+[i] Training complete! Elapsed time - 1.964277s
+[i] Trial: Saving results to ./experiment1/m=svc-s=none-b=20,d=none.pickle
+[s] Best Score: 0.7466666666666667
+[s] Sanity Check: 0.7444444444444445
