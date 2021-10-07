@@ -38,12 +38,16 @@ class DenseTransformer(TransformerMixin):
     def transform(self, X, y=None, **fit_params):
         return X.todense()
 
-# Non Sklearn-adjustable hyperparams go in here!!!
-def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:int, verbosity=2, save_folder='trials'): # TODO pick h-params to adjust
-    df_train, _ = data_prep.get_prepped_dataset(bins=bins, normalize=True)
+# Non Sklearn-adjustable hyperparams go in here!!! # TODO drop-trials rather than drop_attributes
+def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:int, verbosity=2, save_folder='trials', scale_or_norm='none', scoring='accuracy'): # TODO pick h-params to adjust
+    df_train, _ = data_prep.get_prepped_dataset(bins=bins, normalize=False)
+
+    df_train.to_csv("check_myself.csv", index=False)
 
     ## Input validation
-    assert sampling in ['none', 'smote', 'random-under', 'smote-random-under', 'smote-enn', 'smote-tomek']
+    assert sampling in ['none', 'smote', 'random-under', 'smote-random-under']
+    assert scoring in ['accuracy', 'f1']
+    assert scale_or_norm in ['none', 'minmax', 'standard', 'quantile']
     assert model in ['knn', 'dt', 'gnbayes', 'comnbayes', 'svc']
     if drop_attributes != None:
         assert set(drop_attributes) <= set(list(df_train.columns)) # Each col to drop must be in cols
@@ -72,7 +76,7 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
     if bins == None:
         categorical_atts = X.select_dtypes(include='category').columns
         numeric_atts = X.select_dtypes(include=['int64', 'float64']).columns
-        
+
         # Get cat feature mask needed by SMOTENC
         categorical_features = [col in categorical_atts for col in X.columns]
 
@@ -104,22 +108,23 @@ def trial(model:str, param_grid:dict, drop_attributes:list, sampling:str, bins:i
 
         categories = [list(X[col].cat.categories) for col in X[categorical_atts].columns]
 
-        # # Choose scaling type # TODO remove this 
-        # if scaling == 'none':
-        #     scaler = 'passthrough'
-        # elif scaling == 'minmax':
-        #     scaler = MinMaxScaler()
-        # elif scaling == 'standard':
-        #     scaler = StandardScaler()
-        # elif scaling == 'quantile':
-        #     scaler = QuantileTransformer(n_quantiles=len(X)//2)
+        # scaler = 'passthrough'
+        # Choose scaling type # TODO remove this 
+        if scale_or_norm == 'none':
+            scaler = 'passthrough'
+        elif scale_or_norm == 'minmax':
+            scaler = MinMaxScaler()
+        elif scale_or_norm == 'standard':
+            scaler = StandardScaler()
+        elif scale_or_norm == 'quantile':
+            scaler = QuantileTransformer(n_quantiles=len(X)//2)
 
         col_transformer = ColumnTransformer(
             transformers=[
                 # ('onehot', OrdinalEncoder(categories=categories), categorical_atts)
                 ('onehot', OneHotEncoder(categories=categories), categorical_atts)
             ], # One-hot encode categorical attributes
-            remainder='passthrough' # Scale numeric attributes
+            remainder=scaler # Scale numeric attributes
         )
         
         pipe_parts.append(('selective-onehot', col_transformer))
@@ -216,14 +221,17 @@ def _check_results(result:GridSearchCV, drop_attributes, bins):
 
 def main():
 
+    # param_grid = {
+    #     'model_svc__C': [0.001, 0.01, 0.1, 1, 10, 100],
+    #     'model_svc__kernel': ['linear', 'poly', 'rbf', 'sigmoid' ]
+    # }
+
     param_grid = {
-        'model_svc__C': [0.001, 0.01, 0.1, 1, 10, 100],
-        'model_svc__kernel': ['linear', 'poly', 'rbf', 'sigmoid' ]
+        'model_svc__C': [1],
+        'model_svc__kernel': ['linear']
     }
-
-    result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, sampling='smote-random-under', bins=5, save_folder="./final", verbosity=0)
-
     
+    result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, scale_or_norm='quantile', sampling='none', bins=None, save_folder="./sam", verbosity=0)
 
     # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, sampling='smote', bins=5, save_folder="./final", verbosity=0)
     # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, sampling='random-under', bins=5, save_folder="./final", verbosity=0)
@@ -233,12 +241,80 @@ def main():
     # result, _, _ = trial(model='svc', param_grid=param_grid, drop_attributes=None, sampling='random-under', bins=None, save_folder="./final", verbosity=0)
 
 
+def experiment1():
+    """Scaling technique checking"""
+    search_space = [
+        {
+            'model': 'knn',
+            'param_grid': {
+                'model_knn__n_neighbors': [3, 5, 7]
+            }
+        },
+        {
+            'model': 'dt',
+            'param_grid': {
+                'model_dt__criterion': ['entropy'],
+                'model_dt__min_samples_split': [2, 10, 40],
+                'model_dt__min_samples_leaf': [1, 10, 20]
+            }
+        },
+        {
+            'model': 'gnbayes',
+            'param_grid': {
+                'model_gnbayes__var_smoothing': np.logspace(0,-9, num=10)
+            }
+        },
+        {
+            'model': 'comnbayes',
+            'param_grid': {
+                'model_comnbayes__alpha': [0.01, 0.1, 1]
+            }
+        },
+        {
+            'model': 'svc',
+            'param_grid': {
+                'model_svc__C': [0.1, 1, 10],
+                'model_svc__kernel': ['linear', 'poly', 'rbf', 'sigmoid' ]
+            }
+        }
+    ]
 
-def experiment2():
+    save_folder = './experiment1'
+    scaling_techniques = ['none', 'minmax', 'standard', 'quantile']
+
+    print("[M] STARTING EXPERIMENT 1")
+    print("[M] Accuracy Metric")
+    result_data = []
+
+    for scaling_technique in scaling_techniques:
+        for item in search_space:
+            print(f"[M] m={item['model']}, scaling={scaling_technique}")
+            _, best_score, _ = trial(model=item['model'], param_grid=item['param_grid'], drop_attributes=None, sampling='none', bins=5, save_folder=save_folder, verbosity=0)
+            result_data.append([scaling_technique, item['model'], best_score])
+
+    results_table = pd.DataFrame(data=result_data, columns=["scaling_technique", "model", "best_score_acc"])
+    with open('./experiment_logs/experiment3_accuracy.pickle', 'wb') as f:
+        pickle.dump(results_table, f)
+
+    print("[M] F1 Metric")
+    result_data = []
+
+    for scaling_technique in scaling_techniques:
+        for item in search_space:
+            print(f"[M] m={item['model']}, scaling={scaling_technique}")
+            _, best_score, _ = trial(model=item['model'], param_grid=item['param_grid'], drop_attributes=None, sampling='none', bins=None, save_folder=save_folder, verbosity=0)
+            result_data.append([scaling_technique, item['model'], best_score])
+
+    results_table = pd.DataFrame(data=result_data, columns=["scaling_technique", "model", "best_score_acc"])
+    with open('./experiment_logs/experiment3_f1.pickle', 'wb') as f:
+        pickle.dump(results_table, f)
+
+
+def experiment3():
     """Dropping strategy checking"""
 
-    print("[M] STARTING EXPERIMENT 2")
-    save_folder = "experiment2"
+    print("[M] STARTING EXPERIMENT 3")
+    save_folder = "experiment3"
 
     search_space = [
         {
@@ -287,13 +363,13 @@ def experiment2():
             result_data.append([col, item['model'], best_score, f1])
     
     results_table = pd.DataFrame(data=result_data, columns=["dropped_column", "model", "best_score", "f1"])
-    with open('./experiment_logs/experiment2.pickle', 'wb') as f:
+    with open('./experiment_logs/experiment3.pickle', 'wb') as f:
         pickle.dump(results_table, f)
 
-def experiment1():
+def experiment2():
     """Binning strategy checking"""
     print("[M] STARTING EXPERIMENT 1")
-    save_folder = "experiment1"
+    save_folder = "experiment2"
 
     no_bins_search_space = [
         {
@@ -335,7 +411,7 @@ def experiment1():
         {
             'model': 'knn',
             'param_grid': {
-                'model_knn__n_neighbors': [3, 5, 7]
+                'model_knn__n_neighbors': [3, 5, 7, 9]
             }
         },
         {
@@ -384,14 +460,14 @@ def experiment1():
 
     print("[M] DUMPING FINAL RESULTS")
     results_table = pd.DataFrame(data=result_data, columns=["bins", "model", "best_score", "f1"])
-    with open('./experiment_logs/experiment1.pickle', 'wb') as f:
+    with open('./experiment_logs/experiment2.pickle', 'wb') as f:
         pickle.dump(results_table, f)
 
-# def experimentX():
+# def experiment3():
     # """Sampling strategy checking"""
     # print("[M] STARTING EXPERIMENT 1")
 
-    # save_folder = "experiment1"
+    # save_folder = "experiment2"
 
     # search_space = [
     #     {
