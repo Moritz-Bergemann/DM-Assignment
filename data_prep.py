@@ -5,7 +5,7 @@ from scipy.stats import chi2_contingency
 
 def _get_dataset():
     # Read in the data
-    return pd.read_csv('./data/data2021.student.csv')
+    return pd.read_csv('./data2021.student.csv')
 
 def _get_high_corr_cols(df:pd.DataFrame, corr_threshold:float):
     """
@@ -162,7 +162,7 @@ def get_prepped_dataset(bins=None, cat_binning_threshold=30, bin_type='width',
 def main():
     df_in = _get_dataset()
 
-    df_train, df_test = _prep_dataset(df_in, bins=10)
+    df_train, df_test = _prep_dataset(df_in, bins=None, verbose=True)
 
     print("Done! Saving...")
 
