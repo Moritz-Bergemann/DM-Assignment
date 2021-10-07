@@ -7,6 +7,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import LabelEncoder
 import data_prep
 
+np.random.seed(0)
+
 def main():
     model1_drop = ['C24', 'C19', 'C14', 'C28']
     model2_drop = ['C23', 'C19', 'C14', 'C27', 'C28']
